@@ -1,0 +1,32 @@
+{
+  "camera": { "index": 0, "width": 1920, "height": 1080 },
+  "shots": 4,
+  "countdown_seconds": 3,
+  "pause_between_shots": 1.0,
+  "review_seconds": 6,
+  "mirror_preview": true,
+  "mirror_saved": false,
+  "fullscreen": false,
+  "strip": {
+    "layout": "4x6_double",
+    "dpi": 300,
+    "footer_text": "PHOTOBOOTH",
+    "show_date": true,
+    "date_format": "%b %d, %Y",
+    "background": "#FFFFFF",
+    "text_color": "#111111",
+    "grayscale": false
+  },
+  "printer": {
+    "backend": "preview",
+    "open_preview": true,
+    "printer_name": "",
+    "copies": 1,
+    "lp_options": ["fit-to-page"],
+    "escpos_vendor_id": "0x0416",
+    "escpos_product_id": "0x5011",
+    "thermal_width_px": 384
+  },
+  "trigger": { "gpio_pin": null },
+  "output_dir": "output"
+}
