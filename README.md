@@ -57,7 +57,7 @@ macOS gives camera permission to the *app* you launch the booth from, not to Pyt
 | `strip.footer_text` | Text at the bottom of the strip, such as an event name |
 | `strip.layout` | `4x6_double` = two strips on one 4x6 sheet (for photo printers, cut down the middle). `strip` = a single strip (for thermal printers) |
 | `strip.grayscale` | Black and white strips |
-| `mirror_preview` | Mirrors the screen like a selfie camera. The saved photos aren't mirrored, so any text in the background reads correctly |
+| `mirror_preview` | `false` (current) = the screen shows exactly what the photos will look like. `true` = the screen is flipped like a selfie camera, which feels more natural when posing but makes the strip look "backwards" next to what you saw. Saved photos are never flipped either way, so text in the background always reads correctly (unless you set `mirror_saved`) |
 | `printer.backend` | `preview`, `none`, `system`, or `escpos` (see below) |
 | `trigger.gpio_pin` | Set to `17` on the Pi to use a physical button |
 

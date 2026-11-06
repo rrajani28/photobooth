@@ -4,7 +4,7 @@
   "countdown_seconds": 3,
   "pause_between_shots": 1.0,
   "review_seconds": 6,
-  "mirror_preview": true,
+  "mirror_preview": false,
   "mirror_saved": false,
   "fullscreen": false,
   "strip": {
