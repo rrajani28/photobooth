@@ -2,8 +2,8 @@
 """Photobooth: live preview -> countdown -> N photos -> strip -> print.
 
   python booth.py                 run the booth (SPACE = start, F = fullscreen, Q/ESC = quit)
-  python booth.py --list-cameras  find your webcam's index
-  python booth.py --camera 1      use camera 1 (USB webcam is usually 1 on a laptop)
+  python booth.py --list-cameras  find your webcam's index (saves a snapshot from each camera)
+  python booth.py --camera 1      use camera 1 instead of the one in config.json
   python booth.py --fake-camera   test without a webcam
   python booth.py --headless      one session, no window (for testing over SSH on the Pi)
 """

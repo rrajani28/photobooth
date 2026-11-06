@@ -1,5 +1,5 @@
 {
-  "camera": { "index": 0, "width": 1920, "height": 1080 },
+  "camera": { "index": 1, "width": 1920, "height": 1080 },
   "shots": 4,
   "countdown_seconds": 3,
   "pause_between_shots": 1.0,
