@@ -4,4 +4,4 @@ numpy
 # Optional:
 # python-escpos   -> only if you use a USB thermal printer ("backend": "escpos")
 # gpiozero        -> only on a Raspberry Pi for a physical button (preinstalled on Pi OS)
-# pytest          -> to run the tests
+# pytest          -> to run the tests (pip install -r requirements-dev.txt)

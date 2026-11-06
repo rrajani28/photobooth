@@ -1,0 +1,5 @@
+# Everything in requirements.txt, plus what you need to run the tests:
+#   pip install -r requirements-dev.txt
+#   python -m pytest -q
+-r requirements.txt
+pytest

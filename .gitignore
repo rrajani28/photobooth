@@ -1,0 +1,9 @@
+# Python virtual environment (recreate with: python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt)
+.venv/
+# Photos, strips and camera snapshots from every session
+output/
+# Python / pytest caches
+__pycache__/
+.pytest_cache/
+# macOS Finder metadata
+.DS_Store
