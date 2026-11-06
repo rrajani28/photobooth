@@ -162,6 +162,7 @@ class Booth:
         self.trigger = Trigger(cfg["trigger"].get("gpio_pin"))
         self.fullscreen = cfg["fullscreen"]
         self.quit = False
+        self._visible_works = False   # becomes True once the window reports itself visible
 
     # window plumbing
     def _setup_window(self):
@@ -178,15 +179,30 @@ class Booth:
     def _show(self, img):
         cv2.imshow(WINDOW, img)
         key = cv2.waitKey(1) & 0xFF
-        if key in (27, ord("q")):
+        if key in (27, ord("q"), ord("Q")):
             self.quit = True
-        elif key == ord("f"):
+        elif key in (ord("f"), ord("F")):
             self.fullscreen = not self.fullscreen
             self._apply_fullscreen()
         # Closing the window with the X button also quits.
-        if cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1:
+        if self._window_closed():
             self.quit = True
         return key
+
+    def _window_closed(self):
+        """True once the window's X button was clicked. OpenCV builds disagree on how to say that:
+        most report VISIBLE = 0, macOS raises an error because the window is gone, and some older
+        builds (e.g. the Pi's system OpenCV) don't support VISIBLE at all and always answer -1.
+        So a "not visible" answer only counts after the window has reported itself visible once;
+        on builds that never do, Q/ESC still quits."""
+        try:
+            visible = cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE)
+        except cv2.error:
+            return True
+        if visible >= 1:
+            self._visible_works = True
+            return False
+        return self._visible_works
 
     def _live(self):
         """Returns (raw frame for saving, display frame for the screen)."""
