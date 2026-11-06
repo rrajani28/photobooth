@@ -34,15 +34,17 @@ def thermal_prepare(img, width_px=384):
 
 
 def open_file(path):
-    """Open a file in the OS default app. Returns False if there's no way to (e.g. a server)."""
+    """Open a file in the OS default app. Returns False if there's no way to (e.g. a server).
+    On a Mac it opens in the background (`open -g`): the viewer shows the file but the booth keeps
+    the keyboard, so the next SPACE still starts a session instead of going to Preview."""
     path = str(path)
     if sys.platform.startswith("win"):
         os.startfile(path)  # noqa
         return True
-    opener = "open" if sys.platform == "darwin" else "xdg-open"
-    if shutil.which(opener) is None:
+    cmd = ["open", "-g"] if sys.platform == "darwin" else ["xdg-open"]
+    if shutil.which(cmd[0]) is None:
         return False
-    subprocess.Popen([opener, path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen(cmd + [path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return True
 
 
@@ -92,14 +94,16 @@ def _print_escpos(path, cfg):
     except Exception as e:  # noqa: escpos raises several USB error types
         raise PrintError(f"Thermal printer {hex(vid)}:{hex(pid)} not found ({e}). "
                          "Run `lsusb` on the Pi to get the right IDs.") from e
-    for _ in range(int(cfg.get("copies", 1))):
-        p.image(img)
-        p.text("\n\n\n")
-        try:
-            p.cut()
-        except Exception:
-            pass  # many cheap printers have no cutter; tear it off
-    p.close()
+    try:
+        for _ in range(int(cfg.get("copies", 1))):
+            p.image(img)
+            p.text("\n\n\n")
+            try:
+                p.cut()
+            except Exception:
+                pass  # many cheap printers have no cutter; tear it off
+    finally:
+        p.close()   # always let go of the USB port, or every later print fails with "busy"
     return "Printed on thermal printer"
 
 

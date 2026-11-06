@@ -119,10 +119,14 @@ def build_session(shots_bgr, cfg, now=None):
 
 
 def do_print(sheet_path, cfg):
+    """Never raises: a failed print shows up as a message, and the booth keeps running.
+    Printer libraries raise their own errors (USB unplugged, out of paper...), not just PrintError."""
     try:
         return print_image(sheet_path, cfg["printer"])
     except PrintError as e:
         return f"PRINT FAILED: {e}"
+    except Exception as e:  # noqa: BLE001
+        return f"PRINT FAILED: {type(e).__name__}: {e}"
 
 
 # ---------- drawing helpers ----------
