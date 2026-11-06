@@ -12,21 +12,37 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 FONT_CANDIDATES = [
     # Raspberry Pi / Linux
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-    # Mac
+    # Mac (Helvetica.ttc is a collection: Regular, Bold, Oblique... in one file)
     "/System/Library/Fonts/Helvetica.ttc",
-    "/Library/Fonts/Arial Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",   # macOS 10.15 and later
+    "/Library/Fonts/Arial Bold.ttf",                        # older macOS
     # Windows
     "C:/Windows/Fonts/arialbd.ttf",
 ]
 
 
+def _truetype_bold(path, size):
+    """Load the upright Bold face from a font file. A .ttc collection holds several faces and
+    face 0 is usually Regular, so check each face's style name instead of trusting the order."""
+    first = None
+    for index in range(16):
+        try:
+            font = ImageFont.truetype(path, size, index=index)
+        except OSError:
+            break                       # past the last face in the file
+        first = first or font
+        style = font.getname()[1].lower()
+        if "bold" in style and "oblique" not in style and "italic" not in style:
+            return font
+    return first                        # file has no bold face: use its first one
+
+
 def load_font(size):
     for path in FONT_CANDIDATES:
         if os.path.exists(path):
-            try:
-                return ImageFont.truetype(path, size)
-            except OSError:
-                continue
+            font = _truetype_bold(path, size)
+            if font is not None:
+                return font
     try:
         return ImageFont.load_default(size=size)   # Pillow >= 10.1
     except TypeError:
