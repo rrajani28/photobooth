@@ -301,11 +301,14 @@ def run_headless(cfg, camera):
     n = cfg["shots"]
     shots = []
     for i in range(1, n + 1):
-        for s in range(cfg["countdown_seconds"], 0, -1):
-            print(f"  photo {i}/{n} in {s}...")
-            end = time.time() + 1
-            while time.time() < end:
-                camera.read()        # keep the buffer fresh so the photo isn't stale
+        # Same countdown as the window version, so a decimal countdown_seconds (2.5) works here too.
+        end = time.time() + cfg["countdown_seconds"]
+        shown = None
+        while (remaining := end - time.time()) > 0:
+            if math.ceil(remaining) != shown:
+                shown = math.ceil(remaining)
+                print(f"  photo {i}/{n} in {shown}...")
+            camera.read()            # keep the buffer fresh so the photo isn't stale
         shots.append(camera.read())
         print(f"  snap {i}")
     camera.release()
