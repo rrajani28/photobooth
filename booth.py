@@ -82,13 +82,16 @@ def load_config(path):
 
 
 # ---------- saving / composing (no UI, so it's testable and reused by headless mode) ----------
+def output_root(cfg):
+    """output_dir from config; relative paths are relative to this folder, not wherever you ran it from."""
+    out_root = Path(cfg["output_dir"])
+    return out_root if out_root.is_absolute() else HERE / out_root
+
+
 def build_session(shots_bgr, cfg, now=None):
     """Save raw shots + strip + print sheet. Returns (session_dir, sheet_path, sheet_image)."""
     now = now or datetime.datetime.now()
-    out_root = Path(cfg["output_dir"])
-    if not out_root.is_absolute():
-        out_root = HERE / out_root
-    session_dir = out_root / now.strftime("%Y%m%d_%H%M%S")
+    session_dir = output_root(cfg) / now.strftime("%Y%m%d_%H%M%S")
     session_dir.mkdir(parents=True, exist_ok=True)
 
     photos = []
@@ -317,11 +320,11 @@ def main():
     ap.add_argument("--list-cameras", action="store_true")
     args = ap.parse_args()
 
+    cfg = load_config(args.config)
     if args.list_cameras:
-        list_cameras()
+        list_cameras(snapshot_dir=output_root(cfg) / "cameras")
         return
 
-    cfg = load_config(args.config)
     if args.camera is not None:
         cfg["camera"]["index"] = args.camera
 
