@@ -29,7 +29,9 @@ python booth.py --camera 0         # ...or pick a camera just for this run
 
 **Which camera is which:** don't guess from the number. `--list-cameras` saves `output/cameras/camera_0.jpg`, `camera_1.jpg`, … so you can look, and it flags any camera that only sends black.
 
-**Camera index on this MacBook:** `camera.index` is `1`, because Rohan's iPhone shows up as camera `0` (Continuity Camera). If the iPhone isn't nearby, or Continuity Camera is switched off on it, the MacBook camera moves to `0`. **The USB webcam on the Pi will have its own index too.** Run `--list-cameras` on the Pi and set `camera.index` to whatever it shows.
+**Camera numbers can change.** They're not fixed IDs. They shift when a camera appears or disappears. On this MacBook, `camera.index` is `1` because Rohan's iPhone took slot `0` (Continuity Camera). Even with Continuity Camera switched off, macOS kept the phone in its list for a while, sending only black. When macOS drops it, the MacBook camera moves to `0`. The booth handles this: if the camera from `config.json` can't be opened or only sends black, it switches to the first other camera that shows a real picture and prints which one it used. A camera you pick with `--camera N` is never switched.
+
+**The USB webcam on the Pi will have its own index.** Run `--list-cameras` on the Pi and set `camera.index` to whatever it shows.
 
 Controls: **SPACE** starts a session, **F** toggles fullscreen, and **Q** or **ESC** quits.
 
@@ -136,6 +138,7 @@ EOF
 |---|---|
 | Black window or "couldn't open camera" | Try another index from `--list-cameras`. On a Mac, check the camera permission. Close Zoom, FaceTime, and anything else using the camera |
 | `WARNING: camera N is sending an all-black image` | Probably the wrong camera. On a Mac, a nearby iPhone (Continuity Camera) can take an index. Check the snapshots from `--list-cameras` |
+| `Using camera N instead of M` | The camera numbers shifted. The booth found your camera anyway. Set `camera.index` to `N` to skip the search next time |
 | `not authorized to capture video`, and no popup ever appears | You're running it from a terminal inside another app. Use Terminal.app, then allow it under Privacy & Security → Camera |
 | Fonts on the strip aren't bold | No bold system font was found. On the Pi: `sudo apt install fonts-dejavu-core` |
 | Laggy preview | Lower the camera to `1280x720` in config |

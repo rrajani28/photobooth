@@ -19,7 +19,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from camera import Camera, FakeCamera, list_cameras
+from camera import FakeCamera, list_cameras, open_camera
 from printer import PrintError, print_image
 from strip import compose_sheet, compose_strip, frame_to_pil
 from trigger import Trigger
@@ -336,8 +336,11 @@ def main():
         cfg["camera"]["index"] = args.camera
 
     cam_cfg = cfg["camera"]
+    # The config's camera may have changed number since it was set (devices come and go), so fall
+    # back to another working camera. An index typed with --camera means exactly that camera.
     camera = (FakeCamera() if args.fake_camera
-              else Camera(cam_cfg["index"], cam_cfg["width"], cam_cfg["height"]))
+              else open_camera(cam_cfg["index"], cam_cfg["width"], cam_cfg["height"],
+                               fallback=args.camera is None))
 
     if args.headless:
         run_headless(cfg, camera)

@@ -20,6 +20,11 @@ def _backend():
     return cv2.CAP_V4L2               # Linux / Raspberry Pi
 
 
+def _is_black(frame):
+    """An image this dark is a dead camera (switched-off phone, lens cap), not a dim room."""
+    return frame.mean() < 15
+
+
 class Camera:
     def __init__(self, index=0, width=1920, height=1080):
         self.index = index
@@ -35,14 +40,19 @@ class Camera:
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
-        # Let auto-exposure / white balance settle so the first photo isn't dark.
-        for _ in range(15):
-            self.cap.read()
+        try:
+            # Let auto-exposure / white balance settle so the first photo isn't dark.
+            for _ in range(15):
+                self.cap.read()
+            frame = self.read()
+        except Exception:
+            self.cap.release()      # don't leave a half-opened camera busy (its light stays on)
+            raise
 
-        frame = self.read()
         self.resolution = (frame.shape[1], frame.shape[0])
+        self.is_black = _is_black(frame)
         print(f"[camera] index {index} running at {self.resolution[0]}x{self.resolution[1]}")
-        if frame.mean() < 15:
+        if self.is_black:
             print(f"[camera] WARNING: camera {index} is sending an all-black image. Wrong camera "
                   "(e.g. a phone in your pocket), lens covered, or another app is using it? "
                   "Run `python booth.py --list-cameras` to see a snapshot from each camera.")
@@ -56,6 +66,51 @@ class Camera:
 
     def release(self):
         self.cap.release()
+
+
+def open_camera(index, width=1920, height=1080, fallback=True, max_index=6, probe_seconds=0.5):
+    """Open camera `index`. With fallback on, if it can't be opened or only sends black, switch to
+    the first other camera that shows a real image, and say so.
+
+    Camera numbers aren't stable IDs: they shift when a device appears or disappears (a Mac keeps
+    a switched-off iPhone in its list for a while; a USB webcam can come back as a new number after
+    being replugged). If no other camera works, keep the black one: on a Pi with one webcam that's
+    a lens cap, and the warning already says so."""
+    try:
+        cam = Camera(index, width, height)
+        if not cam.is_black or not fallback:
+            return cam
+        problem, error = "only sends black", None
+    except RuntimeError as e:
+        if not fallback:
+            raise
+        cam, problem, error = None, "can't be opened", e
+
+    print(f"[camera] camera {index} {problem}; looking for another camera...", flush=True)
+    old_level = _set_opencv_log_level(2)
+    try:
+        candidates = [i for i in range(max_index)
+                      if i != index and (f := _probe(i, probe_seconds)) is not None and not _is_black(f)]
+    finally:
+        if old_level is not None:
+            _set_opencv_log_level(old_level)
+
+    for i in candidates:
+        try:
+            other = Camera(i, width, height)
+        except RuntimeError:
+            continue
+        if other.is_black:
+            other.release()
+            continue
+        if cam is not None:
+            cam.release()
+        print(f"[camera] Using camera {i} instead of {index}. To make that permanent, set "
+              f"camera.index to {i} in config.json.")
+        return other
+    if cam is not None:
+        return cam
+    raise error
 
 
 class FakeCamera:
