@@ -4,17 +4,26 @@ The booth shows a live webcam preview. When someone presses SPACE (or a physical
 
 The same code runs on a laptop (Mac or Windows) and on a Raspberry Pi. Everything you change lives in `config.json`.
 
+**Helping me test it?** Start with [TESTING.md](TESTING.md).
+
 ```
-booth.py         main app: preview, countdown, flash, review screen
-camera.py        webcam access (plus a fake camera for testing)
-strip.py         builds the 2x6 strip, or a 4x6 sheet with two strips to cut apart
-printer.py       printing: none / system printer / USB thermal printer
-trigger.py       SPACE key or GPIO push button
-config.json      all settings
-tests/           run with: python -m pytest -q   (needs: pip install -r requirements-dev.txt)
+start-mac.command    double-click to run it on a Mac (sets itself up the first time)
+start-windows.bat    double-click to run it on Windows
+TESTING.md           step-by-step guide for anyone testing the booth
+booth.py             main app: preview, countdown, flash, review screen
+camera.py            webcam access (plus a fake camera for testing)
+strip.py             builds the 2x6 strip, or a 4x6 sheet with two strips to cut apart
+printer.py           printing: none / system printer / USB thermal printer
+trigger.py           SPACE key or GPIO push button
+config.json          all settings
+tests/               run with: python -m pytest -q   (needs: pip install -r requirements-dev.txt)
 ```
 
 ## 1. Run it on your laptop
+
+**Quickest:** double-click `start-mac.command` (Mac) or `start-windows.bat` (Windows). The first time, it creates `.venv` and installs the requirements into it. After that, it just starts the booth. If setup gets cut off halfway, it finishes on the next double-click.
+
+To do the same by hand:
 
 ```bash
 cd photobooth
@@ -131,6 +140,16 @@ Name=Photobooth
 Exec=python3 /home/$USER/photobooth/booth.py
 EOF
 ```
+
+## 5. Send it to someone to test
+
+Commit your changes first. The zip is built from the last commit, so anything uncommitted is left out. Then run:
+
+```bash
+git archive --format=zip --prefix=photobooth/ -o ~/Desktop/photobooth.zip HEAD
+```
+
+That makes `photobooth.zip` on the Desktop with only the project files. It leaves out `.venv`, which only works on the computer that made it (the launchers rebuild it), and `output/`, so your photos stay private. Point them to `TESTING.md`.
 
 ## Troubleshooting
 
